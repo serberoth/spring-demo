@@ -1,0 +1,43 @@
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - app
+    networks:
+      - demo_internal
+      - demo_external
+
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB:        postgres
+      POSTGRES_USER:      postgres
+      POSTGRES_PASSWORD:  postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - demo_internal
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: java -jar /opt/boot/app.jar
+    networks:
+      - demo_internal
+
+volumes:
+  postgres_data:
+
+networks:
+  demo_internal:
+    internal: true
+    external: false
+  demo_external:
